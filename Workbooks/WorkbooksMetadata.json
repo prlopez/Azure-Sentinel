@@ -1131,6 +1131,26 @@
     "provider": "Zscaler"
   },
   {
+    "workbookKey": "ZscalerSandboxLogsWorkbook",
+    "logoFileName": "zscaler_logo.svg",
+    "description": "Gain insights into Zscaler Cloud Sandbox verdicts by connecting to Microsoft Sentinel.\nThis workbook provides visibility into file detonation results, threat verdicts, file types, and MITRE ATT&CK mappings across your Zscaler ZIA deployment.",
+    "dataTypesDependencies": [
+      "CommonSecurityLog"
+    ],
+    "dataConnectorsDependencies": [
+      "CloudNSSSandboxLogs_ccp"
+    ],
+    "previewImagesFileNames": [
+      "NSSSandboxLogsBlack.png",
+      "NSSSandboxLogsWhite.png"
+    ],
+    "version": "1.0.0",
+    "title": "Zscaler Sandbox Logs",
+    "templateRelativePath": "NSSSandboxLogs.json",
+    "subtitle": "",
+    "provider": "Zscaler"
+  },
+  {
     "workbookKey": "InsecureProtocolsWorkbook",
     "logoFileName": "Microsoft_logo.svg",
     "description": "Gain insights into insecure protocol traffic by collecting and analyzing security events from Microsoft products.\nYou can view analytics and quickly identify use of weak authentication as well as sources of legacy protocol traffic, like NTLM and SMBv1.\nYou will also have the ability to monitor use of weak ciphers, allowing you to find weak spots in your organization's security.",

@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": false,
+            "basics": {
+                "description": "Obtains an OAuth2 access token for Zscaler OneAPI (ZIdentity) and returns it with the ZIA API base_url.",
+                "subscription": {
+                    "resourceProviders": [
+                        "Microsoft.Logic"
+                    ]
+                },
+                "resourceGroup": {},
+                "location": {
+                    "label": "Region",
+                    "resourceTypes": [
+                        "Microsoft.Logic/workflows"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "PlaybookName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Playbook Name",
+                "defaultValue": "Zscaler-Oauth2-Authentication",
+                "constraints": {
+                    "required": true,
+                    "validations": [
+                        {
+                            "regex": "^[a-zA-Z0-9-]{1,64}$",
+                            "message": "Alphanumeric and hyphens only, max 64."
+                        }
+                    ]
+                },
+                "visible": true
+            },
+            {
+                "name": "OneAPI_ClientId",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Client ID",
+                "toolTip": "OneAPI client ID from your ZIdentity admin portal (API Clients section)",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "OneAPI_ClientSecret",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                    "password": "Client Secret"
+                },
+                "toolTip": "OneAPI client secret from your ZIdentity admin portal",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "OneAPI_VanityDomain",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Vanity Domain",
+                "toolTip": "Your ZIdentity vanity domain prefix (e.g., z-41181109)",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true,
+                "placeholder": "e.g., z-41181109"
+            }
+        ],
+        "steps": [],
+        "outputs": {
+            "PlaybookName": "[basics('PlaybookName')]",
+            "OneAPI_ClientId": "[basics('OneAPI_ClientId')]",
+            "OneAPI_ClientSecret": "[basics('OneAPI_ClientSecret')]",
+            "OneAPI_VanityDomain": "[basics('OneAPI_VanityDomain')]"
+        }
+    }
+}

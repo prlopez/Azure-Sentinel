@@ -1,5 +1,6 @@
 | **Version** | **Date Modified (DD-MM-YYYY)** | **Change History**                             |
 |-------------|--------------------------------|------------------------------------------------|
+| 3.0.5       | 09-06-2026                     | Added CloudNSS Sandbox CCP push connector; updated Email DLP and CASB Email connector schemas/transforms; updated OAuth2 playbooks to use dynamic base_url, split auth into OneAPI and Legacy playbooks, and added Lookup Sandbox Report playbook; added Sandbox Logs workbook |
 | 3.0.4       | 14-02-2026                     | Added 15 CloudNSS CCP push connectors, 17 new workbooks, and OAuth2 playbooks |
 | 3.0.3       | 28-11-2024                     | Removed Deprecated **Data Connectors**         |
 | 3.0.2       | 28-06-2024                     | Deprecating data connectors                    |

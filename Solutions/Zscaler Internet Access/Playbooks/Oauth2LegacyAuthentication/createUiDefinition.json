@@ -1,0 +1,133 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": false,
+            "basics": {
+                "description": "Obtains an OAuth2 access token for Zscaler using a direct token URL (e.g., Entra ID) and returns it with the ZIA API base_url.",
+                "subscription": {
+                    "resourceProviders": [
+                        "Microsoft.Logic"
+                    ]
+                },
+                "resourceGroup": {},
+                "location": {
+                    "label": "Region",
+                    "resourceTypes": [
+                        "Microsoft.Logic/workflows"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "PlaybookName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Playbook Name",
+                "defaultValue": "Zscaler-Oauth2-Legacy-Authentication",
+                "constraints": {
+                    "required": true,
+                    "validations": [
+                        {
+                            "regex": "^[a-zA-Z0-9-]{1,64}$",
+                            "message": "Alphanumeric and hyphens only, max 64."
+                        }
+                    ]
+                },
+                "visible": true
+            },
+            {
+                "name": "Legacy_ClientId",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Client ID",
+                "toolTip": "Entra ID Application (Client) ID for the ZIA API Playbooks app registration",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "Legacy_ClientSecret",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                    "password": "Client Secret"
+                },
+                "toolTip": "Entra ID Client Secret for the ZIA API Playbooks app registration",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "Legacy_TokenUrl",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Token Endpoint URL",
+                "toolTip": "Full OAuth2 token endpoint URL",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true,
+                "placeholder": "e.g., https://<idp-host>/<tenant-id>/oauth2/v2.0/token"
+            },
+            {
+                "name": "Legacy_OAuthScope",
+                "type": "Microsoft.Common.TextBox",
+                "label": "OAuth Scope",
+                "toolTip": "Application ID URI appended with /.default",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true,
+                "placeholder": "e.g., api://<app-id>/.default"
+            },
+            {
+                "name": "Legacy_BaseUrl",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Zscaler Cloud (Base URL)",
+                "defaultValue": "zsapi.zscaler.net/api/v1",
+                "toolTip": "Select the Zscaler cloud for your tenant.",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "zscaler",
+                            "value": "zsapi.zscaler.net/api/v1"
+                        },
+                        {
+                            "label": "zscalertwo",
+                            "value": "zsapi.zscalertwo.net/api/v1"
+                        },
+                        {
+                            "label": "zscalerthree",
+                            "value": "zsapi.zscalerthree.net/api/v1"
+                        },
+                        {
+                            "label": "zscloud",
+                            "value": "zsapi.zscloud.net/api/v1"
+                        },
+                        {
+                            "label": "zscalerbeta",
+                            "value": "zsapi.zscalerbeta.net/api/v1"
+                        },
+                        {
+                            "label": "zscalergov",
+                            "value": "zsapi.zscalergov.net/api/v1"
+                        }
+                    ],
+                    "required": true
+                },
+                "visible": true
+            }
+        ],
+        "steps": [],
+        "outputs": {
+            "PlaybookName": "[basics('PlaybookName')]",
+            "Legacy_ClientId": "[basics('Legacy_ClientId')]",
+            "Legacy_ClientSecret": "[basics('Legacy_ClientSecret')]",
+            "Legacy_TokenUrl": "[basics('Legacy_TokenUrl')]",
+            "Legacy_OAuthScope": "[basics('Legacy_OAuthScope')]",
+            "Legacy_BaseUrl": "[basics('Legacy_BaseUrl')]"
+        }
+    }
+}

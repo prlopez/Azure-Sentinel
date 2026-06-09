@@ -72,7 +72,7 @@
         "instructionSteps": [
           {
             "title": "1. Create ARM Resources and Provide the Required Permissions",
-            "description": "This connector reads data from the tables that Jamf Protect uses in a Microsoft Analytics Workspace, if the [data forwarding](https://docs.jamf.com/jamf-protect/documentation/Data_Forwarding_to_a_Third_Party_Storage_Solution.html?hl=sentinel#task-4227) option is enabled in Jamf Protect then raw event data is sent to the Microsoft Sentinel Ingestion API.",
+            "description": "This connector reads data from the tables that Zscaler uses in a Microsoft Analytics Workspace, if the Cloud NSS option is enabled in Zscaler then raw event data is sent to the Microsoft Sentinel Ingestion API.",
             "instructions": [
               {
                 "type": "Markdown",

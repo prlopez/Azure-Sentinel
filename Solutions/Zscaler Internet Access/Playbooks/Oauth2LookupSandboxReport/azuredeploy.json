@@ -2,20 +2,26 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "metadata": {
-        "title": "Zscaler OAuth2 Lookup URL",
-        "description": "This playbook looks up URL categorization information from Zscaler using OAuth2 authentication.",
+        "title": "Zscaler OAuth2 Lookup Sandbox Report",
+        "description": "This playbook looks up file hash sandbox reports in Zscaler using OAuth2 authentication.",
         "mainSteps": [
-            "1. Gets URL entities from the incident",
-            "2. Uses the OAuth2 authentication playbook to acquire an access token",
-            "3. Looks up URL categorization information from Zscaler"
+            "1. Gets file hash entities from the incident",
+            "2. Extracts the MD5 hash from the entity",
+            "3. Uses the OAuth2 authentication playbook to acquire an access token",
+            "4. Looks up the sandbox report for the file hash"
         ],
         "prerequisites": [
             "1. Deploy the Zscaler-Oauth2-Authentication playbook in the same resource group",
-            "2. Ensure the Logic App managed identity has Microsoft Sentinel Responder permissions"
+            "2. Create a Logic Apps Integration Account (Free tier) in the same resource group",
+            "3. Ensure the Logic App managed identity has Microsoft Sentinel Responder permissions"
+        ],
+        "postDeployment": [
+            "**a. Authorize API connections**",
+            "Authorize the Microsoft Sentinel connection."
         ],
         "lastUpdateTime": "2025-09-02T00:00:00.000Z",
         "entities": [
-            "Url"
+            "FileHash"
         ],
         "tags": [
             "Enrichment"
@@ -30,14 +36,10 @@
             "type": "solution",
             "name": "Zscaler Internet Access"
         },
-        "postDeployment": [
-            "**a. Authorize API connections**",
-            "Authorize the Microsoft Sentinel connection."
-        ],
         "releaseNotes": [
             {
                 "version": "1.0.0",
-                "title": "Zscaler OAuth2 Lookup URL",
+                "title": "Zscaler OAuth2 Lookup Sandbox Report",
                 "notes": [
                     "Initial version"
                 ]
@@ -46,7 +48,7 @@
     },
     "parameters": {
         "PlaybookName": {
-            "defaultValue": "Zscaler-Oauth2-LookupURL",
+            "defaultValue": "Zscaler-Oauth2-LookupSandboxReport",
             "type": "string"
         },
         "Zscaler OAuth2 Authentication Playbook": {
@@ -83,7 +85,7 @@
                                 },
                                 "host": {
                                     "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel_1']['connectionId']"
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
                                 "path": "/incident-creation"
@@ -91,132 +93,128 @@
                         }
                     },
                     "actions": {
-                        "Entities_-_Get_URLs": {
+                        "Entities_-_Get_FileHashes": {
                             "runAfter": {},
                             "type": "ApiConnection",
                             "inputs": {
                                 "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
                                 "host": {
                                     "connection": {
-                                        "name": "@parameters('$connections')['azuresentinel_1']['connectionId']"
+                                        "name": "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
                                 "method": "post",
-                                "path": "/entities/url"
+                                "path": "/entities/filehash"
                             }
                         },
-                        "For_each": {
-                            "foreach": "@body('Entities_-_Get_URLs')?['URLs']",
+                        "Get_MD5_Hash": {
+                            "foreach": "@body('Entities_-_Get_FileHashes')?['Filehashes']",
                             "actions": {
+                                "Extract_Hash_Value": {
+                                    "runAfter": {
+                                        "Parse_JSON": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Compose",
+                                    "inputs": "@replace(body('Parse_JSON')?['hashValue'], '-', '')"
+                                },
                                 "HTTP": {
-                                    "runAfter": {},
+                                    "runAfter": {
+                                        "Parse_JSON_2": [
+                                            "Succeeded"
+                                        ]
+                                    },
                                     "type": "Http",
                                     "inputs": {
-                                        "body": [
-                                            "@{replace(replace(items('For_each')?['Url'], 'https://', ''), 'http://', '')}"
-                                        ],
                                         "headers": {
-                                            "Authorization": "Bearer @{body('Parse_Zscaler-Oauth2-Authentication_JSON_Response')?['access_token']}"
+                                            "Authorization": "Bearer @{body('Parse_JSON_2')?['access_token']}"
                                         },
-                                        "method": "POST",
-                                        "uri": "https://@{body('Parse_Zscaler-Oauth2-Authentication_JSON_Response')?['base_url']}/urlLookup"
+                                        "method": "GET",
+                                        "uri": "https://@{body('Parse_JSON_2')?['base_url']}/sandbox/report/@{outputs('Extract_Hash_Value')}?details=full"
                                     }
                                 },
                                 "Parse_JSON": {
+                                    "runAfter": {},
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@items('Get_MD5_Hash')",
+                                        "schema": {
+                                            "properties": {
+                                                "Type": {
+                                                    "type": "string"
+                                                },
+                                                "Value": {
+                                                    "type": "string"
+                                                },
+                                                "algorithm": {
+                                                    "type": "string"
+                                                },
+                                                "friendlyName": {
+                                                    "type": "string"
+                                                },
+                                                "hashValue": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "Parse_JSON_2": {
                                     "runAfter": {
-                                        "HTTP": [
+                                        "Zscaler-Oauth2-Authentication_2": [
                                             "Succeeded"
                                         ]
                                     },
                                     "type": "ParseJson",
                                     "inputs": {
-                                        "content": "@body('HTTP')",
+                                        "content": "@body('Zscaler-Oauth2-Authentication_2')",
                                         "schema": {
-                                            "items": {
-                                                "properties": {
-                                                    "url": {
-                                                        "type": "string"
-                                                    },
-                                                    "urlClassifications": {
-                                                        "items": {
-                                                            "type": "string"
-                                                        },
-                                                        "type": "array"
-                                                    },
-                                                    "urlClassificationsWithSecurityAlert": {
-                                                        "type": "array"
-                                                    }
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string"
                                                 },
-                                                "required": [
-                                                    "url",
-                                                    "urlClassifications",
-                                                    "urlClassificationsWithSecurityAlert"
-                                                ],
-                                                "type": "object"
+                                                "base_url": {
+                                                    "type": "string"
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer"
+                                                },
+                                                "ext_expires_in": {
+                                                    "type": "integer"
+                                                },
+                                                "token_type": {
+                                                    "type": "string"
+                                                }
                                             },
-                                            "type": "array"
+                                            "type": "object"
                                         }
                                     }
-                                }
-                            },
-                            "runAfter": {
-                                "Parse_Zscaler-Oauth2-Authentication_JSON_Response": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Foreach",
-                            "runtimeConfiguration": {
-                                "concurrency": {
-                                    "repetitions": 1
-                                }
-                            }
-                        },
-                        "Parse_Zscaler-Oauth2-Authentication_JSON_Response": {
-                            "runAfter": {
-                                "Zscaler-Oauth2-Authentication": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "ParseJson",
-                            "inputs": {
-                                "content": "@body('Zscaler-Oauth2-Authentication')",
-                                "schema": {
-                                    "properties": {
-                                        "access_token": {
-                                            "type": "string"
-                                        },
-                                        "base_url": {
-                                            "type": "string"
-                                        },
-                                        "expires_in": {
-                                            "type": "integer"
-                                        },
-                                        "ext_expires_in": {
-                                            "type": "integer"
-                                        },
-                                        "token_type": {
-                                            "type": "string"
-                                        }
+                                },
+                                "Zscaler-Oauth2-Authentication_2": {
+                                    "runAfter": {
+                                        "Extract_Hash_Value": [
+                                            "Succeeded"
+                                        ]
                                     },
-                                    "type": "object"
+                                    "type": "Workflow",
+                                    "inputs": {
+                                        "host": {
+                                            "triggerName": "manual",
+                                            "workflow": {
+                                                "id": "[variables('ZscalerAuthenticationFlow')]"
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                        },
-                        "Zscaler-Oauth2-Authentication": {
+                            },
                             "runAfter": {
-                                "Entities_-_Get_URLs": [
+                                "Entities_-_Get_FileHashes": [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "Workflow",
-                            "inputs": {
-                                "host": {
-                                    "triggerName": "manual",
-                                    "workflow": {
-                                        "id": "[variables('ZscalerAuthenticationFlow')]"
-                                    }
-                                }
-                            }
+                            "type": "Foreach"
                         }
                     },
                     "outputs": {}
@@ -224,7 +222,7 @@
                 "parameters": {
                     "$connections": {
                         "value": {
-                            "azuresentinel_1": {
+                            "azuresentinel": {
                                 "connectionId": "[resourceId('Microsoft.Web/connections', variables('AzureSentinelConnectionName'))]",
                                 "connectionName": "[variables('AzureSentinelConnectionName')]",
                                 "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuresentinel')]",
@@ -236,14 +234,15 @@
                             }
                         }
                     }
-                }
+                },
+                "accessControl": {}
             },
             "name": "[parameters('PlaybookName')]",
             "type": "Microsoft.Logic/workflows",
             "location": "[resourceGroup().location]",
             "tags": {
                 "auth": "Oauth2",
-                "hidden-SentinelTemplateName": "Zscaler-Oauth2-LookupURL",
+                "hidden-SentinelTemplateName": "Zscaler-Oauth2-LookupSandboxReport",
                 "hidden-SentinelTemplateVersion": "1.0"
             },
             "identity": {

@@ -2,15 +2,15 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "metadata": {
-        "title": "Zscaler OAuth2 Authentication (OneAPI)",
-        "description": "Obtains an OAuth2 access token for Zscaler OneAPI (ZIdentity) and returns it together with the ZIA API base_url for downstream playbooks.",
+        "title": "Zscaler OAuth2 Authentication (Legacy)",
+        "description": "Obtains an OAuth2 access token for Zscaler using a direct token URL (e.g., Entra ID) and returns it together with the ZIA API base_url for downstream playbooks.",
         "mainSteps": [
-            "1. Requests an access token from the ZIdentity OAuth2 token endpoint built from your vanity domain",
+            "1. Requests an access token from the configured OAuth2 token endpoint using client credentials and scope",
             "2. Returns the token response with base_url to the caller"
         ],
         "prerequisites": [
-            "1. Zscaler subscription with OneAPI (ZIdentity) access enabled",
-            "2. OneAPI Client ID, Client Secret, and Vanity Domain from the ZIdentity admin portal"
+            "1. Zscaler subscription with legacy API access enabled",
+            "2. Client ID, Client Secret, Token URL, OAuth Scope, and Zscaler cloud (Base URL)"
         ],
         "lastUpdateTime": "2025-09-02T00:00:00.000Z",
         "entities": [],
@@ -33,42 +33,64 @@
         ],
         "releaseNotes": [
             {
-                "version": "4.0.0",
-                "title": "Zscaler OAuth2 Authentication - OneAPI",
+                "version": "1.0.0",
+                "title": "Zscaler OAuth2 Authentication - Legacy",
                 "notes": [
-                    "OneAPI (ZIdentity) authentication only \u2014 for Legacy/direct-token-URL tenants use the Legacy auth playbook"
+                    "Legacy/direct-token-URL authentication only \u2014 for OneAPI (ZIdentity) tenants use the OneAPI auth playbook"
                 ]
             }
         ]
     },
     "parameters": {
         "PlaybookName": {
-            "defaultValue": "Zscaler-Oauth2-Authentication",
+            "defaultValue": "Zscaler-Oauth2-Legacy-Authentication",
             "type": "string",
             "minLength": 1,
             "metadata": {
                 "description": "Name of the Logic App/Playbook"
             }
         },
-        "OneAPI_VanityDomain": {
+        "Legacy_ClientId": {
             "type": "string",
             "minLength": 1,
             "metadata": {
-                "description": "ZIdentity vanity domain prefix \u2014 found in your admin URL: https://<prefix>-admin.zslogin.net (e.g., z-41181109)."
+                "description": "Entra ID Application (Client) ID for the ZIA API Playbooks app registration."
             }
         },
-        "OneAPI_ClientId": {
-            "type": "string",
-            "minLength": 1,
-            "metadata": {
-                "description": "Zscaler OneAPI Client ID from the ZIdentity admin portal."
-            }
-        },
-        "OneAPI_ClientSecret": {
+        "Legacy_ClientSecret": {
             "type": "securestring",
             "minLength": 1,
             "metadata": {
-                "description": "Zscaler OneAPI Client Secret from the ZIdentity admin portal."
+                "description": "Entra ID Client Secret for the ZIA API Playbooks app registration."
+            }
+        },
+        "Legacy_TokenUrl": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "OAuth2 token endpoint URL (e.g., https://<idp-host>/<tenant-id>/oauth2/v2.0/token)."
+            }
+        },
+        "Legacy_OAuthScope": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "OAuth2 scope \u2014 Application ID URI from your ZIA API Web Service app registration appended with /.default."
+            }
+        },
+        "Legacy_BaseUrl": {
+            "defaultValue": "zsapi.zscaler.net/api/v1",
+            "type": "string",
+            "allowedValues": [
+                "zsapi.zscaler.net/api/v1",
+                "zsapi.zscalertwo.net/api/v1",
+                "zsapi.zscalerthree.net/api/v1",
+                "zsapi.zscloud.net/api/v1",
+                "zsapi.zscalerbeta.net/api/v1",
+                "zsapi.zscalergov.net/api/v1"
+            ],
+            "metadata": {
+                "description": "Select your Zscaler cloud."
             }
         }
     },
@@ -81,8 +103,8 @@
             "location": "[resourceGroup().location]",
             "tags": {
                 "auth": "Oauth2",
-                "hidden-SentinelTemplateName": "Zscaler-Oauth2-Authentication",
-                "hidden-SentinelTemplateVersion": "4.0"
+                "hidden-SentinelTemplateName": "Zscaler-Oauth2-Legacy-Authentication",
+                "hidden-SentinelTemplateVersion": "1.0"
             },
             "identity": {
                 "type": "SystemAssigned"
@@ -94,19 +116,23 @@
                     "contentVersion": "1.0.0.0",
                     "parameters": {
                         "clientId": {
-                            "defaultValue": "[parameters('OneAPI_ClientId')]",
+                            "defaultValue": "[parameters('Legacy_ClientId')]",
                             "type": "String"
                         },
                         "clientSecret": {
-                            "defaultValue": "[parameters('OneAPI_ClientSecret')]",
+                            "defaultValue": "[parameters('Legacy_ClientSecret')]",
                             "type": "SecureString"
                         },
-                        "vanityDomain": {
-                            "defaultValue": "[parameters('OneAPI_VanityDomain')]",
+                        "oauthUrl": {
+                            "defaultValue": "[parameters('Legacy_TokenUrl')]",
                             "type": "String"
                         },
-                        "audience": {
-                            "defaultValue": "https://api.zscaler.com",
+                        "scope": {
+                            "defaultValue": "[parameters('Legacy_OAuthScope')]",
+                            "type": "String"
+                        },
+                        "zscalerBaseUrl": {
+                            "defaultValue": "[parameters('Legacy_BaseUrl')]",
                             "type": "String"
                         }
                     },
@@ -118,16 +144,16 @@
                         }
                     },
                     "actions": {
-                        "HTTP_OneAPI_Token": {
+                        "HTTP_Legacy_Token": {
                             "runAfter": {},
                             "type": "Http",
                             "inputs": {
-                                "body": "grant_type=client_credentials&client_id=@{encodeUriComponent(parameters('clientId'))}&client_secret=@{encodeUriComponent(parameters('clientSecret'))}&audience=@{encodeUriComponent(parameters('audience'))}",
+                                "body": "grant_type=client_credentials&client_id=@{encodeUriComponent(parameters('clientId'))}&client_secret=@{encodeUriComponent(parameters('clientSecret'))}&scope=@{encodeUriComponent(parameters('scope'))}",
                                 "headers": {
                                     "Content-Type": "application/x-www-form-urlencoded"
                                 },
                                 "method": "POST",
-                                "uri": "https://@{parameters('vanityDomain')}.zslogin.net/oauth2/v1/token"
+                                "uri": "@parameters('oauthUrl')"
                             },
                             "runtimeConfiguration": {
                                 "secureData": {
@@ -140,12 +166,12 @@
                         },
                         "Build_Response_Body": {
                             "runAfter": {
-                                "HTTP_OneAPI_Token": [
+                                "HTTP_Legacy_Token": [
                                     "Succeeded"
                                 ]
                             },
                             "type": "Compose",
-                            "inputs": "@addProperty(body('HTTP_OneAPI_Token'), 'base_url', 'api.zsapi.net/zia/api/v1')"
+                            "inputs": "@addProperty(body('HTTP_Legacy_Token'), 'base_url', parameters('zscalerBaseUrl'))"
                         },
                         "Parse_Token_Response": {
                             "runAfter": {

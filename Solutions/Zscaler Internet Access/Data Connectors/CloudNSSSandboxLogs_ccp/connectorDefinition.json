@@ -1,39 +1,39 @@
 {
-    "name": "CloudNSSFWLogs_ccp",
+    "name": "CloudNSSSandboxLogs_ccp",
     "apiVersion": "2022-09-01-preview",
     "type": "Microsoft.SecurityInsights/dataConnectorDefinitions",
     "location": "[parameters('workspace-location')]",
     "kind": "Customizable",
     "properties": {
       "connectorUiConfig": {
-        "id": "CloudNSSFWLogs_ccp",
-        "title": "Zscaler Internet Access Cloud NSS Firewall Log Push Connector",
+        "id": "CloudNSSSandboxLogs_ccp",
+        "title": "Zscaler Internet Access Cloud NSS Sandbox Log Push Connector",
         "publisher": "Zscaler",
-        "descriptionMarkdown": "The [Zscaler](https://www.zscaler.com/) connector provides the capability to read ZIA firewall log data in Microsoft Sentinel.",
+        "descriptionMarkdown": "The [Zscaler](https://www.zscaler.com/) connector provides the capability to read ZIA sandbox detonation report log data in Microsoft Sentinel.",
         "graphQueries": [
           {
-            "metricName": "ZIAFWLogs",
+            "metricName": "ZIASandboxLogs",
             "legend": "CommonSecurityLog",
-            "baseQuery": "CommonSecurityLog | where DeviceProduct == 'NSSFWlog'"
+            "baseQuery": "CommonSecurityLog | where DeviceProduct == 'NSSSandboxReport'"
           }
         ],
         "sampleQueries": [
           {
             "description": "ZIA - All Transactions",
-            "query": "CommonSecurityLog\n | where DeviceProduct == 'NSSFWlog'\n | sort by TimeGenerated desc"
+            "query": "CommonSecurityLog\n | where DeviceProduct == 'NSSSandboxReport'\n | sort by TimeGenerated desc"
           }
         ],
         "dataTypes": [
           {
             "name": "CommonSecurityLog",
-            "lastDataReceivedQuery": "CommonSecurityLog\n            | where DeviceProduct == 'NSSFWlog'\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+            "lastDataReceivedQuery": "CommonSecurityLog\n            | where DeviceProduct == 'NSSSandboxReport'\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
           }
         ],
         "connectivityCriteria": [
           {
             "type": "IsConnectedQuery",
             "value": [
-              "CommonSecurityLog\n            | where DeviceProduct == 'NSSFWlog'\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(7d)"
+              "CommonSecurityLog\n            | where DeviceProduct == 'NSSSandboxReport'\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(7d)"
             ]
           }
         ],
@@ -78,8 +78,8 @@
               },
               {
                 "parameters": {
-                  "label": "Deploy Zscaler Internet Access Cloud NSS Firewall Log connector resources",
-                  "applicationDisplayName": "Zscaler Internet Access Cloud NSS Firewall Log connector Application"
+                  "label": "Deploy Zscaler Internet Access Cloud NSS Sandbox Log connector resources",
+                  "applicationDisplayName": "Zscaler Internet Access Cloud NSS Sandbox Log connector Application"
                 },
                 "type": "DeployPushConnectorButton"
               }
