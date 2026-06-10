@@ -1,0 +1,43 @@
+{
+    "name": "CloudNSSZPAPSEStatusLogs_ccp",
+    "apiVersion": "2021-09-01-preview",
+    "type": "Microsoft.Insights/dataCollectionRules",
+    "location": "[parameters('workspace-location')]",
+    "properties": {
+        "streamDeclarations": {
+            "Custom-ZPAPSEStatus_CL": {
+                "columns": [
+                    {
+                        "name": "sourcetype",
+                        "type": "string"
+                    },
+                    {
+                        "name": "event",
+                        "type": "dynamic"
+                    }
+                ]
+            }
+        },
+        "destinations": {
+            "logAnalytics": [
+                {
+                    "workspaceResourceId": "[variables('workspaceResourceId')]",
+                    "name": "clv2ws1"
+                }
+            ]
+        },
+        "dataFlows": [
+            {
+                "streams": [
+                    "Custom-ZPAPSEStatus_CL"
+                ],
+                "destinations": [
+                    "clv2ws1"
+                ],
+                "transformKql": "source | extend Message = tostring(event) | project TimeGenerated = iff(isempty(tostring(event.LogTimestamp)), now(), datetime(1970-01-01) + tolong(event.LogTimestamp) * 1s), Message",
+                "outputStream": "Custom-ZPA_CL"
+            }
+        ],
+        "dataCollectionEndpointId": "[resourceId(parameters('subscription'), parameters('resourceGroupName'), 'Microsoft.Insights/dataCollectionEndpoints', parameters('workspace'))]"
+    }
+}

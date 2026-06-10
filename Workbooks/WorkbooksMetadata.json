@@ -10108,5 +10108,105 @@
 		"templateRelativePath": "DORACompliance.json",
 		"subtitle": "",
 		"provider": "Microsoft"
+	},
+	{
+		"workbookKey": "ZPAUserActivityWorkbook",
+		"logoFileName": "zscaler_logo.svg",
+		"description": "Visualize ZPA user application access activity from the shared ZPA_CL table.",
+		"dataTypesDependencies": [
+			"ZPA_CL"
+		],
+		"dataConnectorsDependencies": [
+			"CloudNSSZPAUserActivityLogs_ccp"
+		],
+		"previewImagesFileNames": [
+			"ZPAUserActivityBlack.png",
+			"ZPAUserActivityWhite.png"
+		],
+		"version": "1.0.0",
+		"title": "ZPA User Activity",
+		"templateRelativePath": "ZPAUserActivity.json",
+		"subtitle": "",
+		"provider": "Zscaler"
+	},
+	{
+		"workbookKey": "ZPAUserStatusWorkbook",
+		"logoFileName": "zscaler_logo.svg",
+		"description": "Visualize ZPA user authentication and session status from the shared ZPA_CL table.",
+		"dataTypesDependencies": [
+			"ZPA_CL"
+		],
+		"dataConnectorsDependencies": [
+			"CloudNSSZPAUserStatusLogs_ccp"
+		],
+		"previewImagesFileNames": [
+			"ZPAUserStatusBlack.png",
+			"ZPAUserStatusWhite.png"
+		],
+		"version": "1.0.0",
+		"title": "ZPA User Status",
+		"templateRelativePath": "ZPAUserStatus.json",
+		"subtitle": "",
+		"provider": "Zscaler"
+	},
+	{
+		"workbookKey": "ZPAAppProtectionWorkbook",
+		"logoFileName": "zscaler_logo.svg",
+		"description": "Visualize ZPA AppProtection (inspection) events from the shared ZPA_CL table.",
+		"dataTypesDependencies": [
+			"ZPA_CL"
+		],
+		"dataConnectorsDependencies": [
+			"CloudNSSZPAAppProtectionLogs_ccp"
+		],
+		"previewImagesFileNames": [
+			"ZPAAppProtectionBlack.png",
+			"ZPAAppProtectionWhite.png"
+		],
+		"version": "1.0.0",
+		"title": "ZPA App Protection",
+		"templateRelativePath": "ZPAAppProtection.json",
+		"subtitle": "",
+		"provider": "Zscaler"
+	},
+	{
+		"workbookKey": "ZPAAppConnectorStatusWorkbook",
+		"logoFileName": "zscaler_logo.svg",
+		"description": "Visualize ZPA App Connector status from the shared ZPA_CL table.",
+		"dataTypesDependencies": [
+			"ZPA_CL"
+		],
+		"dataConnectorsDependencies": [
+			"CloudNSSZPAAppConnectorStatusLogs_ccp"
+		],
+		"previewImagesFileNames": [
+			"ZPAAppConnectorStatusBlack.png",
+			"ZPAAppConnectorStatusWhite.png"
+		],
+		"version": "1.0.0",
+		"title": "ZPA App Connector Status",
+		"templateRelativePath": "ZPAAppConnectorStatus.json",
+		"subtitle": "",
+		"provider": "Zscaler"
+	},
+	{
+		"workbookKey": "ZPAPSEStatusWorkbook",
+		"logoFileName": "zscaler_logo.svg",
+		"description": "Visualize ZPA Private Service Edge status from the shared ZPA_CL table.",
+		"dataTypesDependencies": [
+			"ZPA_CL"
+		],
+		"dataConnectorsDependencies": [
+			"CloudNSSZPAPSEStatusLogs_ccp"
+		],
+		"previewImagesFileNames": [
+			"ZPAPSEStatusBlack.png",
+			"ZPAPSEStatusWhite.png"
+		],
+		"version": "1.0.0",
+		"title": "ZPA PSE Status",
+		"templateRelativePath": "ZPAPSEStatus.json",
+		"subtitle": "",
+		"provider": "Zscaler"
 	}
 ]

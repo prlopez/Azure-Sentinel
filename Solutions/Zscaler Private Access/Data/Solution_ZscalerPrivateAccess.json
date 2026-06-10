@@ -1,0 +1,32 @@
+{
+  "Name": "Zscaler Private Access",
+  "Author": "Zscaler",
+  "Logo": "<img src=\"https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Logos/ZscalerLogo.svg\" width=\"358px\" height=\"221px\">",
+  "Description": "The [Zscaler Private Access](https://www.zscaler.com/products-and-solutions/zscaler-private-access) solution for Microsoft Sentinel ingests [Zscaler Private Access (ZPA) logs](https://help.zscaler.com/zpa/about-log-streaming-service) into Microsoft Sentinel using Zscaler Cloud NSS push connectors.\n\nSupported log types:\n 1. User Activity\n 2. User Status\n 3. App Protection\n 4. App Connector Status\n 5. Private Service Edge (PSE) Status\n\nAll feeds land in the shared **ZPA_CL** table and are surfaced through the included parsers and workbooks.\n\n**Underlying Microsoft Technologies used:**\n\n 1. [Azure Monitor Logs: DCR-based Custom Logs](https://docs.microsoft.com/azure/azure-monitor/logs/custom-logs-overview)\n 2. [Codeless Connector Platform (CCP)](https://docs.microsoft.com/azure/sentinel/create-codeless-connector)",
+  "Data Connectors": [
+    "Data Connectors/CloudNSSZPAUserActivityLogs_ccp/connectorDefinition.json",
+    "Data Connectors/CloudNSSZPAUserStatusLogs_ccp/connectorDefinition.json",
+    "Data Connectors/CloudNSSZPAAppProtectionLogs_ccp/connectorDefinition.json",
+    "Data Connectors/CloudNSSZPAAppConnectorStatusLogs_ccp/connectorDefinition.json",
+    "Data Connectors/CloudNSSZPAPSEStatusLogs_ccp/connectorDefinition.json"
+  ],
+  "Parsers": [
+    "Parsers/ZPAUserActivity.yaml",
+    "Parsers/ZPAUserStatus.yaml",
+    "Parsers/ZPAAppProtection.yaml",
+    "Parsers/ZPAAppConnectorStatus.yaml",
+    "Parsers/ZPAPSEStatus.yaml"
+  ],
+  "Workbooks": [
+    "Workbooks/ZPAUserActivity.json",
+    "Workbooks/ZPAUserStatus.json",
+    "Workbooks/ZPAAppProtection.json",
+    "Workbooks/ZPAAppConnectorStatus.json",
+    "Workbooks/ZPAPSEStatus.json"
+  ],
+  "BasePath": "C:\\Source\\Azure-Sentinel\\Solutions\\Zscaler Private Access\\Data",
+  "Version": "3.0.0",
+  "Metadata": "SolutionMetadata.json",
+  "TemplateSpec": true,
+  "Is1PConnector": false
+}

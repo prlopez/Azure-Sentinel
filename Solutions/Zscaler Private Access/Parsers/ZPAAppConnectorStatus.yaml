@@ -1,0 +1,65 @@
+id: 21eb2da9-4d7d-5ab6-8ebc-8906805e5084
+Function:
+  Title: Parser for ZPA App Connector Status
+  Version: '1.0.0'
+  LastUpdated: '2026-06-09'
+Category: Microsoft Sentinel Parser
+FunctionName: ZPAAppConnectorStatus
+FunctionAlias: ZPAAppConnectorStatus
+FunctionQuery: |
+    // Parse a ZPA timestamp field that may arrive as epoch seconds/ms/microseconds
+    // (Cloud NSS DCR-ingest path) or as a strftime/ISO datetime string (VM/syslog path).
+    let toDt = (x: dynamic) {
+        case(
+            isempty(tostring(x)),         datetime(null),
+            strlen(tostring(x)) == 10,    datetime(1970-01-01) + tolong(x) * 1s,           // epoch seconds (Cloud NSS LogTimestamp)
+            strlen(tostring(x)) == 13,    datetime(1970-01-01) + tolong(x) * 1ms,          // epoch milliseconds
+            strlen(tostring(x)) == 16,    datetime(1970-01-01) + (tolong(x) / 1000) * 1ms, // epoch microseconds (Cloud NSS Timestamp*) — divide first to avoid timespan overflow
+            todatetime(x))                                                                  // VM/syslog "Wed May 27 ..." or ISO 8601
+    };
+    ZPA_CL
+    | extend JsonStart = indexof(Message, "{")
+    | extend CleanMessage = iff(JsonStart >= 0, substring(Message, JsonStart), Message)
+    | extend ParsedData = parse_json(CleanMessage)
+    | where isnotnull(ParsedData.ConnectorGroup)
+    | project
+        EventVendor="Zscaler",
+        EventProduct="Private Access",
+        LogTimestamp = toDt(ParsedData.LogTimestamp),
+        Customer = tostring(ParsedData.Customer),
+        SessionID = tostring(ParsedData.SessionID),
+        SessionType = tostring(ParsedData.SessionType),
+        SessionStatus = tostring(ParsedData.SessionStatus),
+        Version = tostring(ParsedData.Version),
+        Platform = tostring(ParsedData.Platform),
+        ZEN = tostring(ParsedData.ZEN),
+        Connector = tostring(ParsedData.Connector),
+        ConnectorGroup = tostring(ParsedData.ConnectorGroup),
+        PrivateIP = tostring(ParsedData.PrivateIP),
+        PublicIP = tostring(ParsedData.PublicIP),
+        Latitude = todouble(ParsedData.Latitude),
+        Longitude = todouble(ParsedData.Longitude),
+        CountryCode = tostring(ParsedData.CountryCode),
+        TimestampAuthentication = toDt(ParsedData.TimestampAuthentication),
+        TimestampUnAuthentication = toDt(ParsedData.TimestampUnAuthentication),
+        CPUUtilization = toint(ParsedData.CPUUtilization),
+        MemUtilization = toint(ParsedData.MemUtilization),
+        ServiceCount = toint(ParsedData.ServiceCount),
+        InterfaceDefRoute = tostring(ParsedData.InterfaceDefRoute),
+        DefRouteGW = tostring(ParsedData.DefRouteGW),
+        PrimaryDNSResolver = tostring(ParsedData.PrimaryDNSResolver),
+        HostStartTime = tostring(ParsedData.HostStartTime),
+        ConnectorStartTime = tostring(ParsedData.ConnectorStartTime),
+        NumOfInterfaces = toint(ParsedData.NumOfInterfaces),
+        BytesRxInterface = tolong(ParsedData.BytesRxInterface),
+        PacketsRxInterface = tolong(ParsedData.PacketsRxInterface),
+        ErrorsRxInterface = tolong(ParsedData.ErrorsRxInterface),
+        DiscardsRxInterface = tolong(ParsedData.DiscardsRxInterface),
+        BytesTxInterface = tolong(ParsedData.BytesTxInterface),
+        PacketsTxInterface = tolong(ParsedData.PacketsTxInterface),
+        ErrorsTxInterface = tolong(ParsedData.ErrorsTxInterface),
+        DiscardsTxInterface = tolong(ParsedData.DiscardsTxInterface),
+        TotalBytesRx = tolong(ParsedData.TotalBytesRx),
+        TotalBytesTx = tolong(ParsedData.TotalBytesTx),
+        MicroTenantID = tostring(ParsedData.MicroTenantID),
+        Message = CleanMessage;

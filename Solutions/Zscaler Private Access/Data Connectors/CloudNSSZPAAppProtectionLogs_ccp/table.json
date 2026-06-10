@@ -1,0 +1,38 @@
+{
+    "name": "ZPA_CL",
+    "apiVersion": "2021-03-01-privatepreview",
+    "type": "Microsoft.OperationalInsights/workspaces/tables",
+    "location": "{{location}}",
+    "kind": null,
+    "properties": {
+        "schema": {
+            "name": "ZPA_CL",
+            "columns": [
+                {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                },
+                {
+                    "name": "Message",
+                    "type": "string"
+                },
+                {
+                    "name": "SourceSystem",
+                    "type": "string"
+                },
+                {
+                    "name": "RawData",
+                    "type": "string"
+                },
+                {
+                    "name": "ManagementGroupName",
+                    "type": "string"
+                },
+                {
+                    "name": "Computer",
+                    "type": "string"
+                }
+            ]
+        }
+    }
+}

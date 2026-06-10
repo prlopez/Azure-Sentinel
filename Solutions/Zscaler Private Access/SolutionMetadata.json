@@ -1,0 +1,20 @@
+{
+  "publisherId": "zscaler",
+  "offerId": "zscaler_zpa",
+  "firstPublishDate": "2026-06-09",
+  "providers": [
+    "Zscaler"
+  ],
+  "categories": {
+    "domains": [
+      "Security - Network",
+      "Security - Threat Protection"
+    ]
+  },
+  "support": {
+    "name": "Zscaler",
+    "email": "support@zscaler.com",
+    "tier": "Partner",
+    "link": "https://www.zscaler.com/support/"
+  }
+}
